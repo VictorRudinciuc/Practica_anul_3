@@ -8,12 +8,15 @@ export default function Login() {
     const res = await fetch('http://localhost:4000/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
     });
     const data = await res.json();
-    if (data.token) {
+    if (res.ok) {
+      
       localStorage.setItem('token', data.token);
-      alert('Autentificare reușită!');
+      alert('Autentificat cu succes!');
+      setEmail('');
+      setPassword('');
     } else {
       alert(data.error);
     }
@@ -22,8 +25,18 @@ export default function Login() {
   return (
     <div>
       <h2>Autentificare</h2>
-      <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
-      <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Parolă" />
+      <input
+        type="email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        placeholder="Email"
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        placeholder="Parolă"
+      />
       <button onClick={login}>Autentifică-te</button>
     </div>
   );

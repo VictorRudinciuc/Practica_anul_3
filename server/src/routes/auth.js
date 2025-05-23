@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
@@ -8,26 +9,54 @@ const SECRET = process.env.JWT_SECRET;
 
 
 router.post('/register', async (req, res) => {
-  const { email, password } = req.body;
-  const hashed = await bcrypt.hash(password, 10);
+  const { nume, prenume, email, password } = req.body;
   try {
-    await pool.query('INSERT INTO users (email, password) VALUES ($1, $2)', [email, hashed]);
+    
+    const hashed = await bcrypt.hash(password, 10);
+
+    
+    const result = await pool.query(
+      `INSERT INTO "user".register (nume, prenume, email, parola)
+       VALUES ($1, $2,  $3,     $4)
+       RETURNING id`,
+      [nume, prenume, email, hashed]
+    );
+    const userId = result.rows[0].id;
+
+    
+    await pool.query(
+      `INSERT INTO "user".login (id, email, parola)
+       VALUES ($1,  $2,    $3)`,
+      [userId, email, hashed]
+    );
+
     res.status(201).json({ message: 'Cont creat cu succes!' });
   } catch (err) {
-    res.status(400).json({ error: 'Email deja folosit sau eroare server.' });
+    console.error(err);
+    res.status(500).json({ error: 'Eroare la crearea contului.' });
   }
 });
 
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-  const user = result.rows[0];
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    return res.status(401).json({ error: 'Email sau parolă incorecte.' });
+  try {
+    
+    const result = await pool.query(
+      `SELECT * FROM "user".login WHERE email = $1`,
+      [email]
+    );
+    const user = result.rows[0];
+    if (!user || !(await bcrypt.compare(password, user.parola))) {
+      return res.status(401).json({ error: 'Email sau parolă incorecte.' });
+    }
+    
+    const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: '1h' });
+    res.json({ token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Eroare la autentificare.' });
   }
-  const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: '1h' });
-  res.json({ token });
 });
 
 module.exports = router;
