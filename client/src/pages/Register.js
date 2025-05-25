@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import logo from './logo.png'
 
 export default function Register() {
   const [nume, setNume] = useState('');
@@ -48,6 +50,9 @@ export default function Register() {
 
   return (
     <div className="App">
+      <Link to="/home">
+              <img src={logo} alt="Logo" className="logo" />
+      </Link>
       <div className="card">
         <h1>Înregistrare</h1>
         <div className="form-group">

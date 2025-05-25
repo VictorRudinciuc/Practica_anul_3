@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import logo from './logo.png'
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -30,6 +32,9 @@ export default function Login() {
 
   return (
     <div className="App">
+      <Link to="/home">
+        <img src={logo} alt="Logo" className="logo" />
+      </Link>
       <div className="card">
         <h1>Autentificare</h1>
         <div className="form-group">

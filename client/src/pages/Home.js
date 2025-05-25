@@ -1,10 +1,14 @@
 // src/pages/Home.js
 import React from 'react';
 import { Link } from 'react-router-dom';
-
+import logo from './logo.png'
 export default function Home() {
   return (
+    
     <div className="App">
+      <Link to="/home">
+        <img src={logo} alt="Logo" className="logo" />
+      </Link>
       <div className="card">
         <h1>Servicii Publice</h1>
         <div className="button-group">
