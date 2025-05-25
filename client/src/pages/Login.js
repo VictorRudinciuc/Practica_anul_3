@@ -1,43 +1,61 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const login = async () => {
-    const res = await fetch('http://localhost:4000/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      
-      localStorage.setItem('token', data.token);
-      alert('Autentificat cu succes!');
-      setEmail('');
-      setPassword('');
-    } else {
-      alert(data.error);
+    try {
+      const res = await fetch('http://localhost:4000/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        // Salvează tokenul și redirecționează
+        localStorage.setItem('token', data.token);
+        navigate('/dashboard'); 
+      } else {
+        // Afișează mesajul de eroare de la server
+        alert(data.message || 'Date de autentificare invalide');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Eroare la conectare. Încearcă din nou.');
     }
   };
 
   return (
-    <div>
-      <h2>Autentificare</h2>
-      <input
-        type="email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        placeholder="Email"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        placeholder="Parolă"
-      />
-      <button onClick={login}>Autentifică-te</button>
+    <div className="App">
+      <div className="card">
+        <h1>Autentificare</h1>
+        <div className="form-group">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="Email"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="password">Parolă</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="Parolă"
+          />
+        </div>
+        <button onClick={login} className="submit-btn">
+          Autentifică-te
+        </button>
+      </div>
     </div>
   );
 }
