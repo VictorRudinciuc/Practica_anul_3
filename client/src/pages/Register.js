@@ -1,7 +1,11 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import logo from './logo.png'
+import React, { useState } from 'react';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
 
 export default function Register() {
   const [nume, setNume] = useState('');
@@ -16,89 +20,85 @@ export default function Register() {
     /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password);
 
   const register = async () => {
-    if (!nume.trim() || !prenume.trim()) {
-      alert('Te rugăm să completezi numele și prenumele.');
-      return;
-    }
     if (!validateEmail(email)) {
-      alert('Te rugăm să introduci un email valid.');
+      alert("Email invalid");
       return;
     }
     if (!validatePassword(password)) {
-      alert('Parola trebuie să aibă minim 8 caractere, cel puțin o literă mare, o cifră și un caracter special.');
+      alert("Parola trebuie să aibă cel puțin 8 caractere, o literă mare, o cifră și un caracter special.");
       return;
     }
-
-    try {
-      const res = await fetch('http://localhost:4000/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nume, prenume, email, password }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert('Înregistrare realizată cu succes!');
-        navigate('/login');
-      } else {
-        alert(data.message || 'A apărut o eroare la înregistrare.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Eroare la înregistrare. Încearcă din nou.');
+    const res = await fetch('http://localhost:4000/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nume, prenume, email, password }),
+    });
+    if (res.ok) {
+      alert("Înregistrare reușită!");
+      navigate('/login');
+    } else {
+      alert("A apărut o eroare.");
     }
   };
 
   return (
-    <div className="App">
-      <Link to="/home">
-              <img src={logo} alt="Logo" className="logo" />
-      </Link>
-      <div className="card">
-        <h1>Înregistrare</h1>
-        <div className="form-group">
-          <label htmlFor="nume">Nume</label>
-          <input
-            id="nume"
-            type="text"
-            value={nume}
-            onChange={e => setNume(e.target.value)}
-            placeholder="Nume"
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="prenume">Prenume</label>
-          <input
-            id="prenume"
-            type="text"
-            value={prenume}
-            onChange={e => setPrenume(e.target.value)}
-            placeholder="Prenume"
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="Email"
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Parolă</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="Parolă"
-          />
-        </div>
-        <button onClick={register} className="submit-btn">
+    <Card sx={{ p: 3 }}>
+      <CardContent>
+        <Typography variant="h5" gutterBottom>
+          Înregistrare
+        </Typography>
+        <TextField
+          fullWidth
+          label="Nume"
+          value={nume}
+          onChange={e => setNume(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          fullWidth
+          label="Prenume"
+          value={prenume}
+          onChange={e => setPrenume(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          fullWidth
+          label="Email"
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          fullWidth
+          label="Parolă"
+          type="password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={register}
+          fullWidth
+        >
           Înregistrează-te
-        </button>
-      </div>
-    </div>
+        </Button>
+        <Box mt={2} textAlign="center">
+          <Typography variant="body2">
+            Ai deja un cont?{' '}
+            <Button component={RouterLink} to="/login" variant="text">
+              Autentifică-te
+            </Button>
+          </Typography>
+          <Typography variant="body2">
+            <Button component={RouterLink} to="/home" variant="text">
+              Înapoi la Home
+            </Button>
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
   );
 }

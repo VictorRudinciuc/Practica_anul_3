@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import logo from './logo.png'
+import { useNavigate } from 'react-router-dom';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+
 export default function Dashboard() {
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -18,41 +24,52 @@ export default function Dashboard() {
     fetchUser();
   }, []);
 
-  return (
-    <div className="App">
-  <Link to="/home">
-    <img src={logo} alt="Logo" className="logo" />
-  </Link>
-    <Link to="/programare" className="programare-btn">
-        <svg
-          className="btn-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-        >
-          <path d="M19 3h-1V1h-2v2H8V1H6v2H5C3.9 3 3 .9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" />
-        </svg>
-        Programare
-      </Link>
-  <div className="card">
-    <header className="card-header">
-      <h1>Contul meu</h1>
-    </header>
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/home');
+  };
 
-    {user ? (
-      <section className="card-body">
-        <dl className="info-list">
-          <dt>Nume:</dt>
-          <dd>{user.nume}</dd>
-          <dt>Prenume:</dt>
-          <dd>{user.prenume}</dd>
-          <dt>Email:</dt>
-          <dd>{user.email}</dd>
-        </dl>
-      </section>
-    ) : (
-      <p className="loading">Se încarcă…</p>
-    )}
-  </div>
-</div>
-  )
+  return (
+    <Card sx={{ p: 3 }}>
+      <CardContent>
+        <Typography variant="h5" gutterBottom>
+          Contul meu
+        </Typography>
+        {user ? (
+          <>
+            <Grid container spacing={2}>
+              <Grid item xs={4}>
+                <Typography variant="subtitle2">Nume:</Typography>
+              </Grid>
+              <Grid item xs={8}>
+                <Typography>{user.nume}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography variant="subtitle2">Prenume:</Typography>
+              </Grid>
+              <Grid item xs={8}>
+                <Typography>{user.prenume}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <Typography variant="subtitle2">Email:</Typography>
+              </Grid>
+              <Grid item xs={8}>
+                <Typography>{user.email}</Typography>
+              </Grid>
+            </Grid>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleLogout}
+              sx={{ mt: 2 }}
+            >
+              Deconectare
+            </Button>
+          </>
+        ) : (
+          <Typography>Se încarcă…</Typography>
+        )}
+      </CardContent>
+    </Card>
+  );
 }

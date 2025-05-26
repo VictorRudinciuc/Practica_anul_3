@@ -78,7 +78,7 @@ router.get('/profile', authenticate, async (req, res) => {
       [req.userId]
     );
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Utilizator nenăscut.' });
+      return res.status(404).json({ error: 'Utilizator inexistent.' });
     }
     res.json(result.rows[0]);
   } catch (err) {
