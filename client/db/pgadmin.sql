@@ -29,3 +29,19 @@ CREATE TABLE "user".login (
   email    VARCHAR(255)  UNIQUE NOT NULL,
   parola   TEXT          NOT NULL
 );
+
+
+
+CREATE TABLE programari (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES "user".register(id) ON DELETE CASCADE,
+  idnp VARCHAR(14)  NOT NULL,
+  nume VARCHAR(100) NOT NULL,
+  prenume VARCHAR(100) NOT NULL,
+  data_nasterii DATE  NOT NULL,
+  telefon VARCHAR(20) NOT NULL,
+  serviciu VARCHAR(100) NOT NULL,
+  locatie VARCHAR(100) NOT NULL,
+  data_programare DATE NOT NULL,
+  ora TIME         NOT NULL
+);
