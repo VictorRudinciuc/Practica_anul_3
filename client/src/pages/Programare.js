@@ -180,7 +180,7 @@ export default function Programare() {
               </LocalizationProvider>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 select
                 label="Serviciul solicitat"
@@ -197,7 +197,7 @@ export default function Programare() {
               </TextField>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 select
                 label="Locația"
@@ -227,7 +227,7 @@ export default function Programare() {
               </LocalizationProvider>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 select
                 label="Ora"

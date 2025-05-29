@@ -20,6 +20,7 @@ function App() {
   const [mode, setMode] = useState('light');
   const theme = useMemo(() => getTheme(mode), [mode]);
 
+
   const toggleMode = () => {
     setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
   };
@@ -34,6 +35,7 @@ function App() {
               <img src={logo} alt="Logo" style={{ width: 40, marginRight: 8 }} />
             </Button>
             <Typography variant="h6">Servicii Publice</Typography>
+            
           </div>
           <div>
             <IconButton color="inherit" onClick={toggleMode}>
