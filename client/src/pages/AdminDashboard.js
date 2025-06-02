@@ -33,23 +33,35 @@ export default function AdminDashboard() {
       <CardContent>
         <Typography variant="h5">Panou Admin</Typography>
         <List>
-          {programari.map(p => (
-            <ListItem
-              key={p.id}
-              secondaryAction={
-                <Button
-                  variant="outlined"
-                  onClick={() => handleDelete(p.id)}
-                >
-                  Șterge
-                </Button>
-              }
-            >
-              <Typography>
-                {p.data_programare} @ {p.ora} — {p.nume} {p.prenume}
-              </Typography>
-            </ListItem>
-          ))}
+          {programari.map((p) => (
+  <ListItem
+    key={p.id}
+    secondaryAction={
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={() => navigate(`/admin/edit/${p.id}`)}
+        >
+          Editează
+        </Button>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => handleDelete(p.id)}
+        >
+          Șterge
+        </Button>
+      </div>
+    }
+  >
+    <Typography>
+      {p.data_programare} @ {p.ora} — {p.nume} {p.prenume}
+    </Typography>
+  </ListItem>
+))}
+
+    
         </List>
       </CardContent>
     </Card>

@@ -16,6 +16,8 @@ import Dashboard from './pages/Dashboard';
 import Programare from './pages/Programare';
 import logo from './pages/logo.png';
 import AdminDashboard from './pages/AdminDashboard';
+import EditProgramareAdmin from './pages/EditProgramareAdmin';
+
 
 function App() {
   const [mode, setMode] = useState('light');
@@ -57,6 +59,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/programare" element={<Programare />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/edit/:id" element={<EditProgramareAdmin />} />
+
         </Routes>
       </Container>
     </ThemeProvider>

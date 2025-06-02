@@ -107,6 +107,99 @@ router.get('/all', authenticate, async (req, res) => {
   }
 });
 
+router.get('/:id', authenticate, async (req, res) => {
+  if (!req.isAdmin) {
+    return res.status(403).json({ error: 'Acces interzis: doar admin.' });
+  }
+  const { id } = req.params;
+  try {
+    const result = await pool.query(
+      `SELECT * FROM programari WHERE id = $1`,
+      [id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Programare inexistentă.' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Eroare server.' });
+  }
+});
+
+router.put('/:id', authenticate, async (req, res) => {
+  if (!req.isAdmin) {
+    return res.status(403).json({ error: 'Acces interzis: doar admin.' });
+  }
+  const { id } = req.params;
+
+  const {
+    idnp,
+    nume,
+    prenume,
+    dataNasterii,
+    telefon,
+    serviciu,
+    locatie,
+    data,        
+    ora,
+  } = req.body;
+
+  try {
+    const checkExist = await pool.query(
+      `SELECT * FROM programari WHERE id = $1`,
+      [id]
+    );
+    if (checkExist.rows.length === 0) {
+      return res.status(404).json({ error: 'Programare inexistentă.' });
+    }
+
+   
+    const checkSlot = await pool.query(
+      `SELECT * FROM programari WHERE data_programare = $1 AND ora = $2 AND serviciu = $3 AND id != $4`,
+      [data, ora, serviciu, id]
+    );
+    if (checkSlot.rows.length) {
+      return res.status(400).json({ error: 'Slot deja ocupat.' });
+    }
+    
+
+    const updateResult = await pool.query(
+      `UPDATE programari
+         SET idnp = $1,
+             nume = $2,
+             prenume = $3,
+             data_nasterii = $4,
+             telefon = $5,
+             serviciu = $6,
+             locatie = $7,
+             data_programare = $8,
+             ora = $9
+       WHERE id = $10
+       RETURNING *`,
+      [
+        idnp,
+        nume,
+        prenume,
+        dataNasterii,
+        telefon,
+        serviciu,
+        locatie,
+        data,
+        ora,
+        id,
+      ]
+    );
+
+    res.json(updateResult.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Eroare server.' });
+  }
+});
+
+
+
 router.delete('/:id', authenticate, async (req, res) => {
   if (!req.isAdmin) {
     return res.status(403).json({ error: 'Acces interzis: doar admin.' });
