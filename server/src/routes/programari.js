@@ -5,14 +5,17 @@ const jwt = require('jsonwebtoken');
 const SECRET = process.env.JWT_SECRET;
 
 function authenticate(req, res, next) {
-  const auth = req.headers.authorization;
-  if (!auth) return res.status(401).json({ error: 'Token lipsă.' });
-  const token = auth.split(' ')[1];
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Token lipsă.' });
+  }
+  const token = authHeader.split(' ')[1];
   try {
-    const payload = jwt.verify(token, SECRET);
-    req.userId = payload.id;
+    const decoded = jwt.verify(token, SECRET);
+    req.userId = decoded.id;
+    req.isAdmin = decoded.isAdmin || false;
     next();
-  } catch (e) {
+  } catch (err) {
     return res.status(401).json({ error: 'Token invalid.' });
   }
 }
@@ -30,7 +33,6 @@ router.post('/', authenticate, async (req, res) => {
     ora,
   } = req.body;
   try {
-
     const check = await pool.query(
       `SELECT * FROM programari WHERE data_programare = $1 AND ora = $2 AND serviciu = $3`,
       [data, ora, serviciu]
@@ -84,6 +86,35 @@ router.get('/mine', authenticate, async (req, res) => {
       [req.userId]
     );
     res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Eroare server.' });
+  }
+});
+
+router.get('/all', authenticate, async (req, res) => {
+  if (!req.isAdmin) {
+    return res.status(403).json({ error: 'Acces interzis: doar admin.' });
+  }
+  try {
+    const result = await pool.query(
+      `SELECT * FROM programari ORDER BY data_programare DESC, ora DESC`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Eroare server.' });
+  }
+});
+
+router.delete('/:id', authenticate, async (req, res) => {
+  if (!req.isAdmin) {
+    return res.status(403).json({ error: 'Acces interzis: doar admin.' });
+  }
+  const { id } = req.params;
+  try {
+    await pool.query(`DELETE FROM programari WHERE id = $1`, [id]);
+    res.json({ message: 'Programare ștearsă cu succes.' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Eroare server.' });

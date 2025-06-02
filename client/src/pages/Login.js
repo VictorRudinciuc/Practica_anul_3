@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -11,11 +11,24 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  
+
   useEffect(() => {
-  const token = localStorage.getItem('token');
-   if (token) {
-      navigate('/dashboard', { replace: true });
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('http://localhost:4000/auth/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('Token invalid');
+          return res.json();
+        })
+        .then(user => {
+          if (user.is_admin) navigate('/admin', { replace: true });
+          else navigate('/dashboard', { replace: true });
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+        });
     }
   }, [navigate]);
 
@@ -25,21 +38,27 @@ export default function Login() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    if (res.ok) {
-      const data = await res.json();
-      localStorage.setItem('token', data.token);
-      const userRes = await fetch('http://localhost:4000/auth', {
-        headers: { Authorization: `Bearer ${data.token}` },
-     });
-      if (userRes.ok) {
-        const user = await userRes.json();
-        localStorage.setItem('nume', user.nume);
-        localStorage.setItem('prenume', user.prenume);
-      }
-      navigate('/dashboard');
-    } else {
-      alert("E-mail sau parolă incorectă.");
+    if (!res.ok) {
+      alert('E-mail sau parolă incorectă.');
+      return;
     }
+    const { token } = await res.json();
+    localStorage.setItem('token', token);
+
+    const userRes = await fetch('http://localhost:4000/auth/profile', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!userRes.ok) {
+      navigate('/dashboard');
+      return;
+    }
+    const user = await userRes.json();
+    localStorage.setItem('nume', user.nume);
+    localStorage.setItem('prenume', user.prenume);
+    localStorage.setItem('isAdmin', user.is_admin);
+
+    if (user.is_admin) navigate('/admin');
+    else navigate('/dashboard');
   };
 
   return (

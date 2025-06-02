@@ -26,10 +26,12 @@ export default function Dashboard() {
       if (res.ok) {
         const data = await res.json();
         setUser(data);
+      } else {
+        navigate('/home');
       }
     };
     fetchUser();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (!user) return;
@@ -52,7 +54,7 @@ export default function Dashboard() {
   };
 
   return (
-    <Card sx={{ p: 3 }}>
+    <Card sx={{ p: 3, maxWidth: 700, m: 'auto', mt: 4 }}>
       <CardContent>
         <Typography variant="h5" gutterBottom>
           Contul meu
@@ -112,14 +114,27 @@ export default function Dashboard() {
               <Typography>Nu ai nicio programare.</Typography>
             )}
 
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleLogout}
-              sx={{ mt: 3 }}
-            >
-              Deconectare
-            </Button>
+            <Grid container spacing={2} mt={3}>
+              <Grid item>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleLogout}
+                >
+                  Deconectare
+                </Button>
+              </Grid>
+              {user.is_admin && (
+                <Grid item>
+                  <Button
+                    variant="outlined"
+                    onClick={() => navigate('/admin')}
+                  >
+                    Panou Admin
+                  </Button>
+                </Grid>
+              )}
+            </Grid>
           </>
         ) : (
           <Typography>Se încarcă…</Typography>

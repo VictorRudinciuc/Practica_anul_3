@@ -45,3 +45,21 @@ CREATE TABLE programari (
   data_programare DATE NOT NULL,
   ora TIME         NOT NULL
 );
+
+
+ALTER TABLE "user".register
+  ADD COLUMN is_admin BOOLEAN NOT NULL DEFAULT FALSE;
+INSERT INTO "user".register (nume, prenume, email, parola, is_admin)
+VALUES (
+  'Super', 'Admin', 'admin@ex.com',
+  crypt('lolXDlol09!', gen_salt('bf')),
+  TRUE
+);
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+SELECT * FROM "user".register
+SELECT * FROM "user".login
+INSERT INTO "user".login (id, email, parola)
+SELECT id, email, parola
+FROM "user".register
+WHERE email = 'admin@gmail.com';

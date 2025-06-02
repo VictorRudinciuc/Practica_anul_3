@@ -15,6 +15,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Programare from './pages/Programare';
 import logo from './pages/logo.png';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   const [mode, setMode] = useState('light');
@@ -55,6 +56,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/programare" element={<Programare />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </Container>
     </ThemeProvider>

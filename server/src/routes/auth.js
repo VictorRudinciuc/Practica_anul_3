@@ -1,3 +1,4 @@
+// server/src/routes/auth.js
 require('dotenv').config();
 const express = require('express');
 const router = express.Router();
@@ -9,11 +10,14 @@ const SECRET = process.env.JWT_SECRET;
 
 function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ error: 'Token lipsă.' });
+  if (!authHeader)
+    return res.status(401).json({ error: 'Token lipsă.' });
+
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, SECRET);
-    req.userId = decoded.id;
+    req.userId  = decoded.id;
+    req.isAdmin = decoded.isAdmin || false;
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Token invalid.' });
@@ -21,24 +25,21 @@ function authenticate(req, res, next) {
 }
 
 router.post('/register', async (req, res) => {
-  const { nume, prenume, email, password } = req.body;
+  const { nume, prenume, email, password, is_admin } = req.body;
   try {
-    
-    const hashed = await bcrypt.hash(password, 10);
+    const hashed = bcrypt.hashSync(password, 10);
 
-    
-    const result = await pool.query(
-      `INSERT INTO "user".register (nume, prenume, email, parola)
-       VALUES ($1, $2,  $3,     $4)
+    const regResult = await pool.query(
+      `INSERT INTO "user".register (nume, prenume, email, parola, is_admin)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id`,
-      [nume, prenume, email, hashed]
+      [nume, prenume, email, hashed, is_admin || false]
     );
-    const userId = result.rows[0].id;
+    const userId = regResult.rows[0].id;
 
-    
     await pool.query(
       `INSERT INTO "user".login (id, email, parola)
-       VALUES ($1,  $2,    $3)`,
+       VALUES ($1, $2, $3)`,
       [userId, email, hashed]
     );
 
@@ -49,21 +50,26 @@ router.post('/register', async (req, res) => {
   }
 });
 
-
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    
     const result = await pool.query(
-      `SELECT * FROM "user".login WHERE email = $1`,
+      `SELECT l.id, l.email, l.parola, r.is_admin
+       FROM "user".login AS l
+       JOIN "user".register AS r ON l.id = r.id
+       WHERE l.email = $1`,
       [email]
     );
     const user = result.rows[0];
-    if (!user || !(await bcrypt.compare(password, user.parola))) {
+    if (!user || !bcrypt.compareSync(password, user.parola)) {
       return res.status(401).json({ error: 'Email sau parolă incorecte.' });
     }
-    
-    const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: '1h' });
+
+    const payload = {
+      id:      user.id,
+      isAdmin: user.is_admin,
+    };
+    const token = jwt.sign(payload, SECRET, { expiresIn: '1h' });
     res.json({ token });
   } catch (err) {
     console.error(err);
@@ -74,7 +80,9 @@ router.post('/login', async (req, res) => {
 router.get('/profile', authenticate, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT nume, prenume, email FROM "user".register WHERE id = $1`,
+      `SELECT nume, prenume, email, is_admin
+       FROM "user".register
+       WHERE id = $1`,
       [req.userId]
     );
     if (result.rows.length === 0) {
