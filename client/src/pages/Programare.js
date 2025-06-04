@@ -28,6 +28,7 @@ export default function Programare() {
     ora: '',
   });
   const [takenSlots, setTakenSlots] = useState([]);
+
   const services = [
     'Buletin de identitate',
     'Pașaport simplu',
@@ -42,6 +43,8 @@ export default function Programare() {
   const allTimes = [
     '08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'
   ];
+
+  const validateIDNP = (idnp) => /^\d{13,}$/.test(idnp);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -96,6 +99,12 @@ export default function Programare() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateIDNP(form.idnp)) {
+      alert('IDNP invalid: trebuie să conțină cel puțin 13 cifre.');
+      return;
+    }
+
     const payload = {
       ...form,
       dataNasterii: format(form.dataNasterii, 'yyyy-MM-dd'),
@@ -163,6 +172,13 @@ export default function Programare() {
                   required
                   value={form[field]}
                   onChange={handleChange(field)}
+                  {...(field === 'idnp' && {
+                    error: form.idnp !== '' && !validateIDNP(form.idnp),
+                    helperText:
+                      form.idnp !== '' && !validateIDNP(form.idnp)
+                        ? 'IDNP trebuie să aibă cel puțin 13 cifre.'
+                        : '',
+                  })}
                 />
               </Grid>
             ))}
